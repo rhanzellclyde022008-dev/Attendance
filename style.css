@@ -1,0 +1,240 @@
+:root {
+  --bg-dark: #0d0d12;
+  --card-bg: #17171c;
+  --border: #26262c;
+  --purple: #6d28d9;
+  --text-dim: #9ca3af;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  background-color: var(--bg-dark);
+  color: white;
+  font-family: 'Inter', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar Fix */
+.sidebar {
+  width: 220px;
+  border-right: 1px solid var(--border);
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar .logo {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 40px;
+}
+
+.sidebar ul {
+  padding: 0;
+}
+
+.sidebar li {
+  list-style: none;
+  padding: 12px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.sidebar li.active {
+  color: var(--purple);
+  background: rgba(109, 40, 217, 0.1);
+  border-radius: 8px;
+}
+
+/* Main Content Area */
+.content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 40px;
+}
+
+/* Top Navigation Bar */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+}
+
+.search-container {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+}
+
+.search-container input {
+  flex: 1;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 10px;
+}
+
+/* Controls Section (Subject + Gender) */
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.gender-tabs {
+  display: flex;
+  gap: 10px;
+  background: var(--card-bg);
+  padding: 5px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.gender-btn {
+  background: transparent;
+  color: var(--text-dim);
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+
+.gender-btn.active {
+  background: var(--purple);
+  color: white;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+td {
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Buttons inside Table */
+.attendance-btns {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+button {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.present {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.absent {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.cutting {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+button.active {
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+/* Modal Styling */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+  background: var(--card-bg);
+  margin: 10% auto;
+  padding: 30px;
+  border-radius: 20px;
+  width: 50%;
+  border: 1px solid var(--border);
+}
+
+/* Large Logos - Shrink them so they don't break the layout */
+.header img {
+  width: 60px;
+  height: auto;
+}
+
+
+/* Style for the Save Button */
+.save-btn {
+  background: var(--purple);
+  color: white;
+  padding: 10px 20px;
+  font-weight: 600;
+}
+
+/* Style for the Reset Button */
+.reset-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 10px 20px;
+}
+
+.reset-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+/* Update this in your CSS */
+.main-container {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  /* This forces the vertical stack */
+  gap: 20px;
+}
+
+/* Ensure the table isn't squeezed to the side */
+.table-card {
+  width: 100%;
+  margin-top: 20px;
+}
+
+/* If you have a wrapper around the buttons, ensure it aligns left */
+.action-bar {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  width: 100%;
+}

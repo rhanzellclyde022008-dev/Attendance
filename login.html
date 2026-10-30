@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Login</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0f;
+            --card-bg: #1a1a2e;
+            --border: #2a2a3e;
+            --text: #e0e0e0;
+            --purple: #6600ff;
+            --purple-light: #7b1fa2;
+            --green: #48ff00;
+            --red: #ff4d4d;
+            --yellow: #ffc107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(102, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(123, 31, 162, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(102, 0, 255, 0.05) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        /* Login Container */
+        .login-container {
+            background: var(--card-bg);
+            padding: 50px 40px;
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* App Icon */
+        .app-icon {
+            margin-bottom: 30px;
+        }
+
+        .school-logo {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 15px;
+            padding: 15px;
+            background: rgba(102, 0, 255, 0.1);
+            border: 3px solid var(--purple);
+            box-shadow: 0 10px 30px rgba(102, 0, 255, 0.2);
+        }
+
+        /* Title */
+        h2 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, var(--purple), #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Input Boxes */
+        .input-box {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-box input:focus {
+            border-color: var(--purple);
+            box-shadow: 0 0 20px rgba(102, 0, 255, 0.3);
+            background: rgba(102, 0, 255, 0.05);
+        }
+
+        .input-box input::placeholder {
+            color: #888;
+        }
+
+        /* Password Toggle */
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: var(--purple);
+        }
+
+        /* Login Button */
+        .btn-login {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(45deg, var(--purple), var(--purple-light));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 10px 30px rgba(102, 0, 255, 0.3);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 0, 255, 0.4);
+            background: linear-gradient(45deg, var(--purple-light), var(--purple));
+        }
+
+        .btn-login:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Error Message */
+        #error-msg {
+            margin-top: 20px;
+            min-height: 24px;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        /* Additional Styling */
+        .login-container p {
+            margin-top: 25px;
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* Password requirements tooltip - HIDDEN by default */
+        .tooltip {
+            display: none;
+            position: absolute;
+            bottom: -130px;
+            left: 0;
+            background: var(--card-bg);
+            border: 2px solid var(--red);
+            /* Red border for error state */
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 12px;
+            color: #b0b0b0;
+            width: 100%;
+            z-index: 10;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: left;
+            animation: fadeInTooltip 0.3s ease-out;
+        }
+
+        @keyframes fadeInTooltip {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* REMOVED: .input-box:focus-within .tooltip {
+            display: block;
+        } */
+
+        /* Class to show tooltip when there's an error */
+        .show-tooltip .tooltip {
+            display: block;
+        }
+
+        .tooltip ul {
+            list-style: none;
+            padding-left: 10px;
+        }
+
+        .tooltip li {
+            margin-bottom: 5px;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .tooltip li:before {
+            content: "•";
+            color: var(--red);
+            /* Red dots for error state */
+            position: absolute;
+            left: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 40px 25px;
+                margin: 20px;
+            }
+
+            .school-logo {
+                width: 100px;
+                height: 100px;
+            }
+
+            h2 {
+                font-size: 28px;
+            }
+
+            .input-box input {
+                padding: 16px 18px;
+            }
+
+            .btn-login {
+                padding: 16px;
+                font-size: 16px;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--purple);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--purple-light);
+        }
+
+        /* Floating particles effect */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(102, 0, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-1000px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Session timeout warning */
+        .session-timeout {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--red);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: none;
+            animation: slideInRight 0.5s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Floating particles background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Session timeout warning -->
+    <div class="session-timeout" id="sessionTimeout">
+        ⏰ Your session has expired. Please log in again.
+    </div>
+
+    <div class="login-container">
+        <div class="app-icon">
+            <img src="sectionlogo.png" alt="School Logo" class="school-logo">
+        </div>
+
+        <h2>Welcome Back! 👋</h2>
+        <form id="loginForm">
+            <div class="input-box">
+                <input type="text" id="username" placeholder="📧 Email Address" required>
+            </div>
+            <div class="input-box">
+                <input type="password" id="password" placeholder="🔒 Password" required
+                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}"
+                    title="Must be at least 8 characters and include uppercase, lowercase, number, and special character">
+                <button type="button" class="password-toggle" id="togglePassword">👁️</button>
+                <div class="tooltip">
+                    <strong>Password Requirements:</strong>
+                    <ul>
+                        <li>At least 8 characters</li>
+                        <li>One uppercase letter</li>
+                        <li>One lowercase letter</li>
+                        <li>One number</li>
+                        <li>One special character (@$!%*?&)</li>
+                    </ul>
+                </div>
+            </div>
+            <button type="submit" class="btn-login" id="loginBtn">🚀 Login</button>
+        </form>
+
+        <p id="error-msg"></p>
+
+        <p style="margin-top: 20px; color: #666; font-size: 12px;">
+            <em>For security, session expires after 30 minutes of inactivity</em>
+        </p>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 15;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+
+                const size = Math.random() * 80 + 20;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100 + 100}%`;
+
+                const duration = Math.random() * 20 + 15;
+                const delay = Math.random() * 5;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Login functionality
+        const loginForm = document.getElementById("loginForm");
+        const errorMsg = document.getElementById("error-msg");
+        const loginBtn = document.getElementById("loginBtn");
+        const togglePassword = document.getElementById("togglePassword");
+        const sessionTimeout = document.getElementById("sessionTimeout");
+        const passwordInput = document.getElementById('password');
+        const passwordBox = document.querySelector('.input-box:nth-child(2)'); // Password input box
+
+        // Check for session timeout parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('timeout') === 'true') {
+            sessionTimeout.style.display = 'block';
+            setTimeout(() => {
+                sessionTimeout.style.display = 'none';
+            }, 5000);
+        }
+
+        // Check for logout parameter
+        if (urlParams.get('logout') === 'true') {
+            // Clear any existing login data
+            localStorage.removeItem("loggedIn");
+            localStorage.removeItem("username");
+            localStorage.removeItem("loginTime");
+
+            // Show logout message
+            errorMsg.textContent = "✅ Successfully logged out!";
+            errorMsg.style.color = "var(--green)";
+        }
+
+        // Password toggle visibility
+        togglePassword.addEventListener('click', function () {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+        });
+
+        // Example credentials
+        const users = [
+            { username: "admin", password: "Admin123!" },
+        ];
+
+        // Variable to track if we've shown an error
+        let hasShownError = false;
+
+        loginForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            const username = document.getElementById("username").value.trim();
+            const password = passwordInput.value;
+
+            // Disable button during login attempt
+            loginBtn.disabled = true;
+            loginBtn.textContent = "⏳ Authenticating...";
+
+            // Simulate network delay for realism
+            setTimeout(() => {
+                const validUser = users.find(user => user.username === username && user.password === password);
+
+                if (validUser) {
+                    // Hide tooltip if it's shown
+                    passwordBox.classList.remove('show-tooltip');
+
+                    // Show success animation
+                    errorMsg.textContent = "✅ Login successful!";
+                    errorMsg.style.color = "var(--green)";
+
+                    // Save login state with timestamp
+                    localStorage.setItem("loggedIn", "true");
+                    localStorage.setItem("username", username);
+                    localStorage.setItem("loginTime", new Date().getTime());
+
+                    // Clear any stored attendance data (fresh session)
+                    localStorage.removeItem("selectedSubject");
+                    localStorage.removeItem("presentStudents");
+                    localStorage.removeItem("absentStudents");
+                    localStorage.removeItem("cuttingStudents");
+                    localStorage.removeItem("attendanceDate");
+
+                    // Update button text
+                    loginBtn.textContent = "🔗 Redirecting...";
+
+                    // Redirect after delay
+                    setTimeout(() => {
+                        window.location.href = "homepage.html";
+                    }, 1000);
+                } else {
+                    // Show password requirements tooltip
+                    passwordBox.classList.add('show-tooltip');
+                    hasShownError = true;
+
+                    errorMsg.textContent = "❌ Invalid email or password!";
+                    errorMsg.style.color = "var(--red)";
+
+                    // Add shake animation to form
+                    loginForm.style.animation = "shake 0.5s";
+                    setTimeout(() => {
+                        loginForm.style.animation = "";
+                    }, 500);
+
+                    // Re-enable button
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = "🚀 Login";
+                }
+            }, 800); // Simulated network delay
+        });
+
+        // Hide tooltip when user starts typing in password field
+        passwordInput.addEventListener('input', function () {
+            // Only hide if we've shown it due to an error
+            if (hasShownError) {
+                passwordBox.classList.remove('show-tooltip');
+            }
+
+            // Check password strength
+            const password = this.value;
+            const hasMinLength = password.length >= 8;
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /\d/.test(password);
+            const hasSpecial = /[@$!%*?&]/.test(password);
+
+            if (hasMinLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecial) {
+                this.style.borderColor = 'var(--green)';
+            } else {
+                this.style.borderColor = 'var(--border)';
+            }
+        });
+
+        // Hide tooltip when user focuses on username field
+        document.getElementById('username').addEventListener('focus', function () {
+            passwordBox.classList.remove('show-tooltip');
+        });
+
+        // Hide tooltip when user focuses on password field (but keep hidden while typing)
+        passwordInput.addEventListener('focus', function () {
+            // Only hide if we've shown it due to an error
+            if (hasShownError) {
+                passwordBox.classList.remove('show-tooltip');
+            }
+        });
+
+        // Add shake animation keyframes
+        const styleSheet = document.styleSheets[0];
+        styleSheet.insertRule(`
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                20%, 40%, 60%, 80% { transform: translateX(5px); }
+            }
+        `, styleSheet.cssRules.length);
+
+        // Initialize particles on page load
+        window.onload = function () {
+            createParticles();
+
+            // Focus on username field
+            document.getElementById("username").focus();
+
+            // IMPORTANT: REMOVED AUTO-LOGIN CHECK
+            // Users must always manually log in for security
+
+            // Clear any previous login data (just to be safe)
+            // This ensures users always have to log in manually
+            localStorage.removeItem("loggedIn");
+            localStorage.removeItem("loginTime");
+        };
+
+        // Add enter key navigation
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                const focused = document.activeElement;
+                if (focused.id === 'username') {
+                    e.preventDefault();
+                    passwordInput.focus();
+                }
+            }
+        });
+
+        // Add input validation for username
+        document.getElementById('username').addEventListener('input', function () {
+            if (this.value.includes('@')) {
+                this.style.borderColor = 'var(--green)';
+            } else {
+                this.style.borderColor = 'var(--border)';
+            }
+        });
+    </script>
+</body>
+
+</html>

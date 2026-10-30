@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help & Support - 12 Selenite</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0f;
+            --sidebar-bg: #11111a;
+            --card-bg: #1a1a2e;
+            --border: #2a2a3e;
+            --text: #e0e0e0;
+            --purple: #6600ff;
+            --purple-light: #7b1fa2;
+            --green: #48ff00;
+            --red: #ff4d4d;
+            --yellow: #ffc107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar nav ul li {
+            padding: 15px 20px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .sidebar nav ul li:hover {
+            background: rgba(102, 0, 255, 0.1);
+        }
+
+        .sidebar nav ul li.active {
+            background: var(--purple);
+            color: white;
+        }
+
+        .sidebar-bottom {
+            list-style: none;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-bottom li {
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-bottom li:hover {
+            background: rgba(102, 0, 255, 0.1);
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            margin-left: 250px;
+            min-height: 100vh;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(102, 0, 255, 0.1) 0%, rgba(26, 26, 46, 0.8) 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(102, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(123, 31, 162, 0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Section */
+        .header-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .header-left img,
+        .header-right img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(102, 0, 255, 0.1);
+            border: 2px solid var(--purple);
+        }
+
+        .header-center {
+            text-align: center;
+        }
+
+        .header-center h1 {
+            font-size: 36px;
+            margin: 0;
+            background: linear-gradient(45deg, var(--purple), #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header-center .class-name {
+            font-size: 20px;
+            color: var(--purple);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Help Content */
+        .help-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .help-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .help-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--purple);
+            box-shadow: 0 15px 40px rgba(102, 0, 255, 0.3);
+        }
+
+        .help-card h3 {
+            font-size: 24px;
+            color: var(--purple);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .help-card p {
+            color: #b0b0b0;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .help-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .help-card ul li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .help-card ul li:last-child {
+            border-bottom: none;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 40px;
+            border: 2px solid var(--purple);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 40px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .contact-section h2 {
+            font-size: 32px;
+            color: var(--purple);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .contact-item {
+            background: rgba(102, 0, 255, 0.1);
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            border-color: var(--purple);
+            transform: translateY(-3px);
+        }
+
+        .contact-icon {
+            font-size: 32px;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .contact-label {
+            color: var(--purple);
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .contact-value {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .contact-note {
+            color: #b0b0b0;
+            font-size: 14px;
+            font-style: italic;
+        }
+
+        .contact-link {
+            color: var(--purple);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .contact-link:hover {
+            color: var(--purple-light);
+            text-decoration: underline;
+        }
+
+        /* Report Issue Form */
+        .report-form {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 40px;
+            border: 2px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .report-form h2 {
+            font-size: 32px;
+            color: var(--purple);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: white;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--purple);
+            box-shadow: 0 0 15px rgba(102, 0, 255, 0.3);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--purple);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 0, 255, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: var(--purple-light);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 0, 255, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            margin-top: 40px;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .faq-item:hover {
+            border-color: var(--purple);
+        }
+
+        .faq-question {
+            color: white;
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-answer {
+            color: #b0b0b0;
+            line-height: 1.6;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .faq-item.active .faq-answer {
+            max-height: 500px;
+        }
+
+        .faq-toggle {
+            color: var(--purple);
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .content {
+                margin-left: 200px;
+            }
+
+            .header-center h1 {
+                font-size: 28px;
+            }
+
+            .header-left img,
+            .header-right img {
+                width: 60px;
+                height: 60px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 20px 10px;
+            }
+
+            .sidebar .logo {
+                font-size: 20px;
+                margin-bottom: 30px;
+            }
+
+            .sidebar nav ul li {
+                padding: 12px 5px;
+                font-size: 12px;
+                text-align: center;
+            }
+
+            .content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .help-content {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                display: none;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .header-center h1 {
+                font-size: 24px;
+            }
+
+            .header-center .class-name {
+                font-size: 16px;
+            }
+
+            .contact-section,
+            .report-form,
+            .help-card {
+                padding: 25px;
+            }
+
+            .contact-section h2,
+            .report-form h2 {
+                font-size: 24px;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--purple);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--purple-light);
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">12 - Selenite</div>
+        <nav>
+            <ul>
+                <li onclick="window.location.href='homepage.html'">🏠 Home</li>
+                <li onclick="window.location.href='attendance.html'">📋 Attendance</li>
+                <li class="active" onclick="window.location.href='help.html'">ℹ️ Help</li>
+                <li onclick="logout()">🚪 Log Out</li>
+                <div class="sidebar-bottom">
+
+                </div>
+    </aside>
+
+    <main class="content">
+        <div class="main-container">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="header-left">
+                    <img src="srlogo.png" alt="School Logo">
+                </div>
+                <div class="header-center">
+                    <h1>Help & Support Center</h1>
+                    <div class="class-name">12-SELENITE TECHNICAL SUPPORT</div>
+                </div>
+                <div class="header-right">
+                    <img src="sectionlogo.png" alt="Section Logo">
+                </div>
+            </div>
+
+            <!-- Help Content -->
+            <div class="help-content">
+                <!-- Getting Started -->
+                <div class="help-card">
+                    <h3>🚀 Getting Started</h3>
+                    <p>Welcome to the Classroom Attendance System! Here's how to get started:</p>
+                    <ul>
+                        <li>✅ <strong>Step 1:</strong> Navigate to Attendance page</li>
+                        <li>✅ <strong>Step 2:</strong> Select a subject from the dropdown</li>
+                        <li>✅ <strong>Step 3:</strong> Mark attendance for each student</li>
+                        <li>✅ <strong>Step 4:</strong> Click Save Attendance when done</li>
+                        <li>✅ <strong>Step 5:</strong> View subjects for detailed information</li>
+                    </ul>
+                </div>
+
+                <!-- System Features -->
+                <div class="help-card">
+                    <h3>⚡ System Features</h3>
+                    <p>Our system includes the following features:</p>
+                    <ul>
+                        <li>📋 <strong>Attendance Tracking:</strong> Mark Present, Absent, or Cutting</li>
+                        <li>📊 <strong>Data Storage:</strong> All data saved in browser storage</li>
+                        <li>🔍 <strong>Search Function:</strong> Quickly find students by name</li>
+                        <li>👥 <strong>Gender Filter:</strong> Filter students by gender</li>
+                        <li>💾 <strong>Auto-save:</strong> Data persists between sessions</li>
+                        <li>📚 <strong>Subject Management:</strong> Multiple subject support</li>
+                    </ul>
+                </div>
+
+                <!-- Troubleshooting -->
+                <div class="help-card">
+                    <h3>🔧 Troubleshooting</h3>
+                    <p>Common issues and solutions:</p>
+                    <ul>
+                        <li>⚠️ <strong>Data not saving?</strong> Check browser storage permissions</li>
+                        <li>⚠️ <strong>Subject not selected?</strong> Click "Select Subject" button</li>
+                        <li>⚠️ <strong>Can't see all students?</strong> Check gender filter settings</li>
+                        <li>⚠️ <strong>Page not loading?</strong> Clear browser cache and refresh</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="contact-section">
+                <h2>📞 Contact Information</h2>
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <span class="contact-icon">👨‍💻</span>
+                        <span class="contact-label">Developer</span>
+                        <span class="contact-value">Rhanzell Clyde A. Ramos</span>
+                        <span class="contact-value">John Daniel S. Mangulabnan</span>
+                        <span class="contact-value">Jena Faith P. Rico</span>
+                        <span class="contact-note">System Developer & Designer</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <span class="contact-icon">📧</span>
+                        <span class="contact-label">Email</span>
+                        <span class="contact-value">rhanzellclyde022008@gmail.com</span>
+                        <a href="mailto:rovicagapito@gmail.com" class="contact-link">Send Email</a>
+                    </div>
+
+                    <div class="contact-item">
+                        <span class="contact-icon">📱</span>
+                        <span class="contact-label">Phone</span>
+                        <span class="contact-value">+63 991 320 9057</span>
+                        <span class="contact-note">Available: 1:00 PM - 11:00 PM</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <span class="contact-icon">🏫</span>
+                        <span class="contact-label">School</span>
+                        <span class="contact-value">San Ricardo National High School</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <span class="contact-icon">💬</span>
+                        <span class="contact-label">Messenger</span>
+                        <span class="contact-value">Rhanzell Clyde</span>
+                        <span class="contact-note">Facebook Messenger</span>
+                    </div>
+
+                    <div class="contact-item">
+                        <span class="contact-icon">📍</span>
+                        <span class="contact-label">Location</span>
+                        <span class="contact-value">Baluga Talavera Nueva Ecija</span>
+                        <span class="contact-note">Philippines</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Issue Form -->
+            <div class="report-form">
+                <h2>📝 Report an Issue</h2>
+                <form id="issueReportForm">
+                    <div class="form-group">
+                        <label for="issueType">Issue Type</label>
+                        <select id="issueType" required>
+                            <option value="">Select issue type...</option>
+                            <option value="bug">🐛 Bug Report</option>
+                            <option value="feature">✨ Feature Request</option>
+                            <option value="ui">🎨 UI/UX Issue</option>
+                            <option value="data">💾 Data Problem</option>
+                            <option value="performance">⚡ Performance Issue</option>
+                            <option value="other">❓ Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="issueSubject">Subject</label>
+                        <select id="issueSubject">
+                            <option value="">Select subject (optional)</option>
+                            <option value="EAPP">EAPP</option>
+                            <option value="Entrepreneurship">Entrepreneurship</option>
+                            <option value="Practical Research 2">Practical Research 2</option>
+                            <option value="COOKERY-ACP-ICT">COOKERY-ACP-ICT</option>
+                            <option value="Work Immersion">Work Immersion</option>
+                            <option value="Physical Education">Physical Education</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="issueDescription">Description</label>
+                        <textarea id="issueDescription" placeholder="Please describe the issue in detail..."
+                            required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactEmail">Your Email (Optional)</label>
+                        <input type="email" id="contactEmail" placeholder="your.email@example.com">
+                    </div>
+
+                    <button type="submit" class="submit-btn">📤 Submit Report</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Initialize the help page
+        window.onload = function () {
+            // Initialize FAQ functionality
+            initializeFAQ();
+
+            // Initialize form submission
+            initializeForm();
+        };
+
+        // Toggle FAQ answers
+        function toggleFAQ(item) {
+            item.classList.toggle('active');
+        }
+
+        // Initialize FAQ functionality
+        function initializeFAQ() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                item.addEventListener('click', function () {
+                    this.classList.toggle('active');
+                });
+            });
+        }
+
+        // Initialize form submission
+        function initializeForm() {
+            const form = document.getElementById('issueReportForm');
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                // Get form values
+                const issueType = document.getElementById('issueType').value;
+                const issueSubject = document.getElementById('issueSubject').value;
+                const issueDescription = document.getElementById('issueDescription').value;
+                const contactEmail = document.getElementById('contactEmail').value;
+
+                // Validate required fields
+                if (!issueType || !issueDescription) {
+                    alert('⚠️ Please fill in all required fields.');
+                    return;
+                }
+
+                // Create issue object
+                const issue = {
+                    type: issueType,
+                    subject: issueSubject,
+                    description: issueDescription,
+                    email: contactEmail,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                };
+
+                // Save to localStorage (in a real app, this would go to a server)
+                const existingIssues = JSON.parse(localStorage.getItem('reportedIssues') || '[]');
+                existingIssues.push(issue);
+                localStorage.setItem('reportedIssues', JSON.stringify(existingIssues));
+
+                // Show success message with contact info
+                alert(`✅ Issue reported successfully!\n\n` +
+                    `Issue ID: ${Date.now()}\n` +
+                    `Type: ${getIssueTypeLabel(issueType)}\n` +
+                    `Subject: ${issueSubject || 'Not specified'}\n\n` +
+                    `📞 We will contact you via: ${contactEmail || 'the provided contact methods'}\n` +
+                    `⏰ Expected response: Within 24 hours\n\n` +
+                    `Thank you for your feedback!`);
+
+                // Reset form
+                form.reset();
+            });
+        }
+
+        // Get human-readable issue type label
+        function getIssueTypeLabel(type) {
+            const labels = {
+                'bug': '🐛 Bug Report',
+                'feature': '✨ Feature Request',
+                'ui': '🎨 UI/UX Issue',
+                'data': '💾 Data Problem',
+                'performance': '⚡ Performance Issue',
+                'other': '❓ Other Issue'
+            };
+            return labels[type] || type;
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to log out?')) {
+                alert('Logged out successfully!');
+                window.location.href = 'login.html'; // Redirect to login page
+            }
+        }
+
+        // Quick contact functions
+        function sendEmail() {
+            window.location.href = 'mailto:rovicagapito@gmail.com?subject=Classroom%20Attendance%20System%20Support&body=Hello%20Rovic,%0A%0AI%20need%20help%20with...';
+        }
+
+        function callSupport() {
+            alert('📞 Calling support: +63 912 345 6789\n\nNote: This is a demo number. In a real system, this would initiate a call.');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // F1 for help (already on help page)
+            if (e.key === 'F1') {
+                e.preventDefault();
+                alert('You are already on the Help page!');
+            }
+            // Ctrl + H for home
+            if (e.ctrlKey && e.key === 'h') {
+                e.preventDefault();
+                window.location.href = 'homepage.html';
+            }
+            // Ctrl + A for attendance
+            if (e.ctrlKey && e.key === 'a') {
+                e.preventDefault();
+                window.location.href = 'attendance.html';
+            }
+            // Ctrl + S for subjects
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                window.location.href = 'subjects.html';
+            }
+        });
+
+        // Add animation to page elements on load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate elements sequentially
+            const animatedElements = document.querySelectorAll('.header-section, .help-card, .contact-section, .report-form');
+            animatedElements.forEach((element, index) => {
+                setTimeout(() => {
+                    element.style.animation = 'slideUp 0.6s ease-out forwards';
+                }, index * 100);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Results</title>
+  <style>
+    :root {
+      --bg-color: #0a0a0f;
+      --sidebar-bg: #11111a;
+      --card-bg: #1a1a2e;
+      --border: #2a2a3e;
+      --text: #e0e0e0;
+      --purple: #6600ff;
+      --purple-light: #7b1fa2;
+      --green: #48ff00;
+      --red: #ff4d4d;
+      --yellow: #ffc107;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(102, 0, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(123, 31, 162, 0.1) 0%, transparent 50%);
+      z-index: 0;
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Header Section */
+    .header-section {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 15px;
+      border: 2px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      margin-bottom: 30px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header-section h1 {
+      font-size: 42px;
+      margin: 0 0 20px 0;
+      background: linear-gradient(45deg, var(--purple), #ff00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .date-subject-info {
+      display: flex;
+      justify-content: center;
+      gap: 50px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .info-card {
+      background: rgba(102, 0, 255, 0.1);
+      padding: 15px 30px;
+      border-radius: 10px;
+      border: 2px solid var(--purple);
+    }
+
+    .info-card h2 {
+      font-size: 24px;
+      margin-bottom: 5px;
+      color: var(--purple);
+    }
+
+    .info-card span {
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 30px 0;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 15px 40px;
+      background: linear-gradient(45deg, var(--purple), var(--purple-light));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(102, 0, 255, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(102, 0, 255, 0.4);
+      background: linear-gradient(45deg, var(--purple-light), var(--purple));
+    }
+
+    .action-btn.back-btn {
+      background: #666;
+    }
+
+    .action-btn.back-btn:hover {
+      background: #777;
+    }
+
+    /* Results Grid */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    .result-card {
+      background: var(--card-bg);
+      border-radius: 15px;
+      padding: 30px;
+      border: 2px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result-card:hover {
+      border-color: var(--purple);
+      transform: translateY(-5px);
+    }
+
+    .result-card h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+      color: var(--purple);
+      text-align: center;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    /* Present Card */
+    .result-card.present h2 {
+      color: var(--green);
+    }
+
+    /* Absent Card */
+    .result-card.absent h2 {
+      color: var(--red);
+    }
+
+    /* Cutting Card */
+    .result-card.cutting h2 {
+      color: var(--yellow);
+    }
+
+    /* Tables */
+    .student-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .student-table thead {
+      background: rgba(102, 0, 255, 0.2);
+    }
+
+    .student-table th {
+      padding: 15px;
+      text-align: left;
+      color: var(--purple);
+      font-weight: bold;
+      font-size: 18px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .student-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid var(--border);
+      font-size: 16px;
+    }
+
+    .student-table tbody tr:hover {
+      background: rgba(102, 0, 255, 0.05);
+    }
+
+    /* Totals Table */
+    .totals-section {
+      background: var(--card-bg);
+      border-radius: 15px;
+      padding: 30px;
+      border: 2px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      margin-top: 40px;
+      animation: slideUp 0.8s ease-out;
+    }
+
+    .totals-section h2 {
+      font-size: 28px;
+      margin-bottom: 25px;
+      color: var(--purple);
+      text-align: center;
+    }
+
+    .totals-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .totals-table thead {
+      background: linear-gradient(90deg, var(--purple), var(--purple-light));
+    }
+
+    .totals-table th {
+      padding: 18px;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .totals-table td {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      font-size: 16px;
+    }
+
+    .totals-table tbody tr:last-child {
+      background: rgba(102, 0, 255, 0.1);
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .totals-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px;
+      color: #888;
+      font-size: 18px;
+      font-style: italic;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .date-subject-info {
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px;
+      }
+
+      .header-section h1 {
+        font-size: 32px;
+      }
+
+      .info-card {
+        padding: 12px 20px;
+      }
+
+      .info-card h2 {
+        font-size: 18px;
+      }
+
+      .info-card span {
+        font-size: 16px;
+      }
+
+      .action-btn {
+        padding: 12px 25px;
+        font-size: 16px;
+      }
+
+      .result-card {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .action-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .action-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .date-subject-info {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--card-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--purple);
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--purple-light);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    <!-- Header Section -->
+    <div class="header-section">
+      <h1>📊 Attendance Results</h1>
+
+      <div class="date-subject-info">
+        <div class="info-card">
+          <h2>📅 Attendance Date:</h2>
+          <span id="attendanceDateDisplay">Loading...</span>
+        </div>
+
+        <div class="info-card">
+          <h2>📚 Subject:</h2>
+          <span id="subjectDisplay">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="action-btn" onclick="saveAttendanceFile()">
+        💾 Save Attendance File
+      </button>
+      <button class="action-btn back-btn" onclick="goBack()">
+        ⬅ Back to Attendance
+      </button>
+    </div>
+
+    <!-- Results Grid -->
+    <div class="results-grid">
+      <!-- Present Students -->
+      <div class="result-card present">
+        <h2>✅ Present Students</h2>
+        <table class="student-table" id="presentTable">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Will be populated by JavaScript -->
+          </tbody>
+        </table>
+        <div class="empty-state" id="presentEmpty" style="display: none;">
+          No students marked as present
+        </div>
+      </div>
+
+      <!-- Absent Students -->
+      <div class="result-card absent">
+        <h2>❌ Absent Students</h2>
+        <table class="student-table" id="absentTable">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Will be populated by JavaScript -->
+          </tbody>
+        </table>
+        <div class="empty-state" id="absentEmpty" style="display: none;">
+          No students marked as absent
+        </div>
+      </div>
+
+      <!-- Cutting Students -->
+      <div class="result-card cutting">
+        <h2>✂️ Cutting Students</h2>
+        <table class="student-table" id="cuttingTable">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Will be populated by JavaScript -->
+          </tbody>
+        </table>
+        <div class="empty-state" id="cuttingEmpty" style="display: none;">
+          No students marked as cutting
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals Section -->
+    <div class="totals-section">
+      <h2>📈 Attendance Totals</h2>
+      <table class="totals-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>👨 Male</th>
+            <th>👩 Female</th>
+            <th>👥 Total</th>
+          </tr>
+        </thead>
+        <tbody id="totalsBody">
+          <!-- Will be populated by JavaScript -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // Load data from localStorage
+    const presentStudents = JSON.parse(localStorage.getItem('presentStudents')) || [];
+    const absentStudents = JSON.parse(localStorage.getItem('absentStudents')) || [];
+    const cuttingStudents = JSON.parse(localStorage.getItem('cuttingStudents')) || [];
+
+    // Get date and subject - use the formatted display date
+    let attendanceDate = localStorage.getItem('attendanceDate') || 'No date selected';
+    const savedSubject = localStorage.getItem('selectedSubject') || 'No subject selected';
+
+    // Check if we have fresh data (less than 5 minutes old)
+    const attendanceTimestamp = localStorage.getItem('attendanceTimestamp');
+    const currentTime = new Date().getTime();
+
+    // If data is older than 5 minutes, show warning
+    if (attendanceTimestamp && (currentTime - parseInt(attendanceTimestamp)) > 300000) {
+      // 300000ms = 5 minutes
+      alert("⚠️ Note: Loading previously saved attendance data. For new attendance, please go back to the attendance page.");
+    }
+
+    // If no data is found, redirect back to attendance page
+    if (presentStudents.length === 0 && absentStudents.length === 0 && cuttingStudents.length === 0) {
+      alert("No attendance data found. Redirecting to attendance page...");
+      setTimeout(() => {
+        window.location.href = "attendance.html";
+      }, 1500);
+    }
+
+    // Student lists
+    const maleStudents = [
+      "Agapito, Cris Rovic M.",
+      "Aguilar, Gian Jay T.",
+      "Aruta, Mark Angelo P.",
+      "Beltran, Patrick",
+      "Fernando, Cyrus M.",
+      "Francisco, John Carlo P.",
+      "Ilagan, Rhayber Joseph A.",
+      "Javier, Efren Louie",
+      "Manalang, Ramil",
+      "Mangulabnan, John Daniel S.",
+      "Marcos, Kenneth A.",
+      "Marcos, Prince DG.",
+      "Nipa, MJ P.",
+      "Puaso, Wency G.",
+      "Ramos, Janrey P.",
+      "Ramos, Jerome G.",
+      "Ramos, Rhanzell Clyde A.",
+      "Trinidad, Cedrick S."
+    ];
+
+    const femaleStudents = [
+      "Agustin, Lyka Joy B.",
+      "Binuya, Aliyah Nicole S.",
+      "Canoza, Shaira V.",
+      "Capinlac, Alexa Keseiah R.",
+      "Cornes, Jenny Ann A.",
+      "De San Jose, Angelica Y.",
+      "Dela Cruz, Sarah Jhoi R.",
+      "Dequilla, Jhanna C.",
+      "Dizon, Samantha Nicole S.",
+      "Garcia, Mariane Shane DL.",
+      "Gaspalinao, Airiene D.",
+      "Gloria, Gianelli M.",
+      "Madrid, Noraine Zyra O.",
+      "Marcos, Kathleen Joy B.",
+      "Mase, Marianne P.",
+      "Medrano, Ashley Mae B.",
+      "Mendoza, Irish C.",
+      "Navarro, Rosette DC.",
+      "Nool, Sharmaine DC.",
+      "Pabayos, Mary Jane DL.",
+      "Pagandahan, Larissa E.",
+      "Pascual, Lian Rose H.",
+      "Rico, Jena Faith P.",
+      "Rosco, Maureen S.",
+      "San Jose, Chaize B.",
+      "San Jose, Diana Rose",
+      "Serrano, Angelica "
+    ];
+
+    // Sort the lists
+    presentStudents.sort();
+    absentStudents.sort();
+    cuttingStudents.sort();
+
+    // Display date and subject
+    document.getElementById('attendanceDateDisplay').textContent = attendanceDate;
+    document.getElementById('subjectDisplay').textContent = savedSubject;
+
+    // Populate tables
+    function populateTable(tableId, students, emptyElementId) {
+      const tableBody = document.querySelector(`#${tableId} tbody`);
+      const emptyElement = document.getElementById(emptyElementId);
+
+      if (students.length === 0) {
+        tableBody.parentElement.style.display = 'none';
+        emptyElement.style.display = 'block';
+      } else {
+        tableBody.parentElement.style.display = 'table';
+        emptyElement.style.display = 'none';
+        students.forEach(name => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${name}</td>`;
+          tableBody.appendChild(tr);
+        });
+      }
+    }
+
+    // Populate the tables
+    populateTable('presentTable', presentStudents, 'presentEmpty');
+    populateTable('absentTable', absentStudents, 'absentEmpty');
+    populateTable('cuttingTable', cuttingStudents, 'cuttingEmpty');
+
+    // Calculate totals
+    const totalPresentMale = presentStudents.filter(n => maleStudents.includes(n)).length;
+    const totalPresentFemale = presentStudents.filter(n => femaleStudents.includes(n)).length;
+    const totalAbsentMale = absentStudents.filter(n => maleStudents.includes(n)).length;
+    const totalAbsentFemale = absentStudents.filter(n => femaleStudents.includes(n)).length;
+    const totalCuttingMale = cuttingStudents.filter(n => maleStudents.includes(n)).length;
+    const totalCuttingFemale = cuttingStudents.filter(n => femaleStudents.includes(n)).length;
+
+    // Populate totals table
+    const totalsBody = document.querySelector('#totalsBody');
+    totalsBody.innerHTML = `
+            <tr>
+                <td style="color: var(--green); font-weight: bold;">✅ Present</td>
+                <td>${totalPresentMale}</td>
+                <td>${totalPresentFemale}</td>
+                <td>${totalPresentMale + totalPresentFemale}</td>
+            </tr>
+            <tr>
+                <td style="color: var(--red); font-weight: bold;">❌ Absent</td>
+                <td>${totalAbsentMale}</td>
+                <td>${totalAbsentFemale}</td>
+                <td>${totalAbsentMale + totalAbsentFemale}</td>
+            </tr>
+            <tr>
+                <td style="color: var(--yellow); font-weight: bold;">✂️ Cutting</td>
+                <td>${totalCuttingMale}</td>
+                <td>${totalCuttingFemale}</td>
+                <td>${totalCuttingMale + totalCuttingFemale}</td>
+            </tr>
+            <tr>
+                <td style="color: var(--purple); font-weight: bold;">👥 Total Students</td>
+                <td>${totalPresentMale + totalAbsentMale + totalCuttingMale}</td>
+                <td>${totalPresentFemale + totalAbsentFemale + totalCuttingFemale}</td>
+                <td>${presentStudents.length + absentStudents.length + cuttingStudents.length}</td>
+            </tr>
+        `;
+
+    // Navigation functions
+    function goBack() {
+      window.location.href = "attendance.html";
+    }
+
+    function saveAttendanceFile() {
+      // Get the raw date for filename (YYYY-MM-DD format)
+      const rawDate = localStorage.getItem('attendanceRawDate') || new Date().toISOString().split('T')[0];
+
+      let content = `ATTENDANCE REPORT\n`;
+      content += `=================\n\n`;
+      content += `Date: ${attendanceDate}\n`;
+      content += `Subject: ${savedSubject}\n\n`;
+      content += `Total Students: ${presentStudents.length + absentStudents.length + cuttingStudents.length}\n\n`;
+
+      function addCategory(name, students) {
+        content += `${name.toUpperCase()} STUDENTS (${students.length}):\n`;
+        content += `-`.repeat(30) + `\n`;
+        if (students.length === 0) {
+          content += "None\n";
+        } else {
+          students.forEach((student, index) => {
+            content += `${index + 1}. ${student}\n`;
+          });
+        }
+        content += `\n`;
+      }
+
+      addCategory("Present", presentStudents);
+      addCategory("Absent", absentStudents);
+      addCategory("Cutting", cuttingStudents);
+
+      content += `SUMMARY\n`;
+      content += `-`.repeat(30) + `\n`;
+      content += `Male Students: ${totalPresentMale + totalAbsentMale + totalCuttingMale}\n`;
+      content += `Female Students: ${totalPresentFemale + totalAbsentFemale + totalCuttingFemale}\n`;
+      content += `Total Present: ${totalPresentMale + totalPresentFemale}\n`;
+      content += `Total Absent: ${totalAbsentMale + totalAbsentFemale}\n`;
+      content += `Total Cutting: ${totalCuttingMale + totalCuttingFemale}\n\n`;
+      content += `Generated on: ${new Date().toLocaleString()}\n`;
+
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Attendance_${rawDate.replace(/[^a-zA-Z0-9]/g, '_')}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Show success message
+      alert('✅ Attendance file saved successfully!');
+    }
+
+    // Add animations on page load
+    window.addEventListener('load', function () {
+      const elements = document.querySelectorAll('.result-card, .totals-section');
+      elements.forEach((element, index) => {
+        setTimeout(() => {
+          element.style.animation = 'slideUp 0.6s ease-out forwards';
+        }, index * 100);
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classroom Attendance</title>
+  <style>
+    :root {
+      --bg-color: #0a0a0f;
+      --sidebar-bg: #11111a;
+      --card-bg: #1a1a2e;
+      --border: #2a2a3e;
+      --text: #e0e0e0;
+      --purple: #6600ff;
+      --purple-light: #7b1fa2;
+      --green: #48ff00;
+      --red: #ff4d4d;
+      --yellow: #ffc107;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      transition: margin-left 0.3s ease;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: var(--sidebar-bg);
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      border-right: 1px solid var(--border);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+    }
+
+    .sidebar-hidden {
+      transform: translateX(-100%);
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: white;
+      text-align: center;
+      flex: 1;
+    }
+
+    .sidebar-toggle {
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(102, 0, 255, 0.3);
+      margin-left: 10px;
+    }
+
+    .sidebar-toggle:hover {
+      background: var(--purple-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(102, 0, 255, 0.4);
+    }
+
+    .sidebar nav ul {
+      list-style: none;
+      flex-grow: 1;
+    }
+
+    .sidebar nav ul li {
+      padding: 15px 20px;
+      margin: 5px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 16px;
+    }
+
+    .sidebar nav ul li:hover {
+      background: rgba(102, 0, 255, 0.1);
+    }
+
+    .sidebar nav ul li.active {
+      background: var(--purple);
+      color: white;
+    }
+
+    .sidebar-bottom {
+      list-style: none;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .sidebar-bottom li {
+      padding: 12px 20px;
+      margin: 5px 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-bottom li:hover {
+      background: rgba(102, 0, 255, 0.1);
+    }
+
+    /* Floating Toggle Button for when sidebar is hidden */
+    .floating-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      font-size: 24px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(102, 0, 255, 0.4);
+      z-index: 999;
+    }
+
+    .floating-toggle:hover {
+      background: var(--purple-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(102, 0, 255, 0.5);
+    }
+
+    /* Main Content */
+    .content {
+      flex: 1;
+      margin-left: 250px;
+      min-height: 100vh;
+      padding: 30px;
+      background: linear-gradient(135deg, rgba(102, 0, 255, 0.1) 0%, rgba(26, 26, 46, 0.8) 100%);
+      position: relative;
+      overflow-x: hidden;
+      transition: margin-left 0.3s ease, padding 0.3s ease;
+    }
+
+    .content-expanded {
+      margin-left: 0;
+      padding-left: 50px;
+    }
+
+    .content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 20% 50%, rgba(102, 0, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(123, 31, 162, 0.1) 0%, transparent 50%);
+      z-index: 0;
+    }
+
+    .main-container {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header Section */
+    .header-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 15px;
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .header-left img,
+    .header-right img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(102, 0, 255, 0.1);
+      border: 2px solid var(--purple);
+    }
+
+    .header-center {
+      text-align: center;
+    }
+
+    .header-center h1 {
+      font-size: 36px;
+      margin: 0;
+      background: linear-gradient(45deg, var(--purple), #ff00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .header-center .class-name {
+      font-size: 20px;
+      color: var(--purple);
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    /* Search and Date Section */
+    .search-date-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      gap: 20px;
+    }
+
+    .search-container {
+      flex: 1;
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-container input {
+      flex: 1;
+      padding: 15px 20px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .search-container input:focus {
+      outline: none;
+      border-color: var(--purple);
+      box-shadow: 0 0 15px rgba(102, 0, 255, 0.3);
+    }
+
+    .search-container button {
+      padding: 15px 25px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+
+    .search-container button:hover {
+      background: rgba(102, 0, 255, 0.2);
+      border-color: var(--purple);
+    }
+
+    .date-display {
+      background: var(--card-bg);
+      border: 2px solid var(--purple);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      font-size: 16px;
+      text-align: center;
+      min-width: 300px;
+      cursor: default;
+      user-select: none;
+      box-shadow: 0 5px 20px rgba(102, 0, 255, 0.2);
+    }
+
+    .date-display span {
+      color: var(--purple);
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    /* Top Controls Row */
+    .top-controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 30px 0;
+      padding: 25px;
+      background: var(--card-bg);
+      border-radius: 15px;
+      border: 2px solid var(--border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .controls-left,
+    .controls-center,
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .subject-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .subject-select-btn {
+      padding: 12px 25px;
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(102, 0, 255, 0.3);
+    }
+
+    .subject-select-btn:hover {
+      background: var(--purple-light);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(102, 0, 255, 0.4);
+    }
+
+    .subject-display,
+    .subject-required {
+      font-size: 16px;
+      font-weight: bold;
+      padding: 10px 15px;
+      border-radius: 8px;
+      background: rgba(102, 0, 255, 0.1);
+    }
+
+    .subject-display {
+      color: var(--green);
+      border: 2px solid var(--green);
+    }
+
+    .subject-required {
+      color: var(--red);
+      border: 2px solid var(--red);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    /* Mark All Buttons Section */
+    .mark-all-section {
+      display: flex;
+      gap: 10px;
+      margin-left: 15px;
+    }
+
+    .mark-all-btn {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .mark-all-btn.present-all {
+      background: var(--green);
+      color: #000;
+    }
+
+    .mark-all-btn.present-all:hover {
+      background: #40e600;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(72, 255, 0, 0.3);
+    }
+
+    .mark-all-btn.absent-all {
+      background: var(--red);
+      color: white;
+    }
+
+    .mark-all-btn.absent-all:hover {
+      background: #ff3333;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 77, 77, 0.3);
+    }
+
+    /* Optional: Add a reset all button style */
+    .mark-all-btn.reset-all {
+      background: #666;
+      color: white;
+    }
+
+    .mark-all-btn.reset-all:hover {
+      background: #777;
+    }
+
+    .gender-tabs {
+      display: flex;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 5px;
+      border-radius: 10px;
+    }
+
+    .gender-btn {
+      padding: 12px 20px;
+      background: transparent;
+      border: 2px solid var(--border);
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .gender-btn.active {
+      background: var(--purple);
+      border-color: var(--purple);
+      box-shadow: 0 5px 15px rgba(102, 0, 255, 0.3);
+    }
+
+    .gender-btn:hover:not(.active) {
+      background: rgba(102, 0, 255, 0.1);
+      border-color: var(--purple);
+    }
+
+    .save-btn {
+      padding: 12px 25px;
+      background: var(--purple);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(102, 0, 255, 0.3);
+    }
+
+    .save-btn:hover {
+      background: var(--purple-light);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(102, 0, 255, 0.4);
+    }
+
+    .save-btn.reset {
+      background: #666;
+    }
+
+    .save-btn.reset:hover {
+      background: #777;
+    }
+
+    /* Attendance Table */
+    .attendance-table-container {
+      margin-top: 30px;
+      background: var(--card-bg);
+      border-radius: 15px;
+      overflow: hidden;
+      border: 2px solid var(--border);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 1s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    #attendanceTable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #attendanceTable thead:first-of-type {
+      background: linear-gradient(90deg, var(--purple), var(--purple-light));
+    }
+
+    #attendanceTable th {
+      padding: 20px;
+      text-align: left;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      border-bottom: 2px solid var(--border);
+    }
+
+    #attendanceTable .male-header th,
+    #attendanceTable .female-header th {
+      background: rgba(102, 0, 255, 0.2);
+      text-align: center;
+      font-size: 20px;
+      padding: 15px;
+      color: var(--purple);
+    }
+
+    #attendanceTable td {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      color: #ddd;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    #attendanceTable tbody tr {
+      transition: all 0.3s ease;
+    }
+
+    #attendanceTable tbody tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(5px);
+    }
+
+    #attendanceTable button {
+      margin-right: 8px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #attendanceTable button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    #attendanceTable button.present {
+      background: var(--green);
+      color: #000;
+    }
+
+    #attendanceTable button.present:hover {
+      background: #40e600;
+    }
+
+    #attendanceTable button.absent {
+      background: var(--red);
+      color: white;
+    }
+
+    #attendanceTable button.absent:hover {
+      background: #ff3333;
+    }
+
+    #attendanceTable button.cutting {
+      background: var(--yellow);
+      color: #000;
+    }
+
+    #attendanceTable button.cutting:hover {
+      background: #ffb300;
+    }
+
+    /* NEW STYLES FOR SELECTED BUTTONS - Slightly gray/faded */
+    #attendanceTable button.present.active {
+      background: rgba(72, 255, 0, 0.7);
+      /* Slightly faded green */
+      filter: brightness(0.9) grayscale(0.3);
+      /* Adds slight gray tone */
+      border: 2px solid var(--green);
+      /* Keep border color */
+    }
+
+    #attendanceTable button.absent.active {
+      background: rgba(255, 77, 77, 0.7);
+      /* Slightly faded red */
+      filter: brightness(0.9) grayscale(0.3);
+      /* Adds slight gray tone */
+      border: 2px solid var(--red);
+      /* Keep border color */
+    }
+
+    #attendanceTable button.cutting.active {
+      background: rgba(255, 193, 7, 0.7);
+      /* Slightly faded yellow */
+      filter: brightness(0.9) grayscale(0.3);
+      /* Adds slight gray tone */
+      border: 2px solid var(--yellow);
+      /* Keep border color */
+    }
+
+    #attendanceTable button.active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      padding: 40px;
+      border-radius: 20px;
+      border: 2px solid var(--purple);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(102, 0, 255, 0.4);
+      animation: modalSlide 0.5s ease-out;
+    }
+
+    @keyframes modalSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-content h3 {
+      font-size: 28px;
+      margin-bottom: 30px;
+      color: var(--purple);
+    }
+
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .subject-grid button {
+      padding: 15px;
+      background: rgba(102, 0, 255, 0.1);
+      border: 2px solid var(--border);
+      color: white;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .subject-grid button:hover {
+      background: var(--purple);
+      border-color: var(--purple);
+      transform: translateY(-3px);
+    }
+
+    .close-modal {
+      padding: 15px 40px;
+      background: #666;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .close-modal:hover {
+      background: #777;
+      transform: translateY(-2px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      .top-controls-row {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .controls-left,
+      .controls-center,
+      .controls-right {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 200px;
+      }
+
+      .content {
+        margin-left: 200px;
+      }
+
+      .header-center h1 {
+        font-size: 28px;
+      }
+
+      .header-left img,
+      .header-right img {
+        width: 60px;
+        height: 60px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 70px;
+        padding: 20px 10px;
+      }
+
+      .sidebar .logo {
+        font-size: 20px;
+        margin-bottom: 30px;
+      }
+
+      .sidebar nav ul li {
+        padding: 12px 5px;
+        font-size: 12px;
+        text-align: center;
+      }
+
+      .content {
+        margin-left: 70px;
+        padding: 20px;
+      }
+
+      .header-section {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+      }
+
+      .search-date-section {
+        flex-direction: column;
+      }
+
+      .date-display {
+        min-width: 100%;
+      }
+
+      .subject-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .floating-toggle {
+        display: flex;
+      }
+
+      .mark-all-section {
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-left: 0;
+        margin-top: 10px;
+      }
+
+      .mark-all-btn {
+        padding: 10px 15px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .sidebar {
+        display: none;
+      }
+
+      .sidebar-hidden {
+        transform: translateX(-100%);
+      }
+
+      .sidebar:not(.sidebar-hidden) {
+        display: flex;
+        transform: translateX(0);
+      }
+
+      .content {
+        margin-left: 0;
+        padding: 15px;
+      }
+
+      .content-expanded {
+        padding-left: 15px;
+      }
+
+      .header-center h1 {
+        font-size: 24px;
+      }
+
+      .header-center .class-name {
+        font-size: 16px;
+      }
+
+      #attendanceTable button {
+        padding: 8px 12px;
+        font-size: 12px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+
+      .gender-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .floating-toggle {
+        display: flex;
+      }
+
+      .controls-left {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .mark-all-section {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 10px;
+      }
+
+      .mark-all-btn {
+        flex: 1;
+        margin: 2px;
+      }
+    }
+
+    /* Animation for table rows */
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.02);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--card-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--purple);
+      border-radius: 5px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--purple-light);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Floating toggle button (visible when sidebar is hidden) -->
+  <button class="floating-toggle" onclick="toggleSidebar()">☰</button>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">12 - Selenite</div>
+      <button class="sidebar-toggle" onclick="toggleSidebar()">✕</button>
+    </div>
+    <nav>
+      <ul>
+        <li onclick="window.location.href='homepage.html'">🏠 Home</li>
+        <li class="active">📋 Attendance</li>
+        <li onclick="window.location.href='help.html'">ℹ️ Help</li>
+        <li onclick="window.location.href='login.html'">🚪 Log Out</li>
+      </ul>
+    </nav>
+    <div class="sidebar-bottom">
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="content" id="mainContent">
+    <div class="main-container">
+      <!-- Header Section -->
+      <div class="header-section">
+        <div class="header-left">
+          <img src="srlogo.png" alt="School Logo">
+        </div>
+        <div class="header-center">
+          <h1>Classroom Attendance</h1>
+          <div class="class-name">12-SELENITE</div>
+        </div>
+        <div class="header-right">
+          <img src="sectionlogo.png" alt="Section Logo">
+        </div>
+      </div>
+
+      <!-- Search and Date Section -->
+      <div class="search-date-section">
+        <div class="search-container">
+          <input type="text" id="searchInput" placeholder="🔍 Search student name..." onkeyup="searchStudents()">
+          <button onclick="clearSearch()">Clear</button>
+        </div>
+        <div class="date-display" id="currentDateDisplay">
+          Today's Date: <span id="currentDate"></span>
+        </div>
+      </div>
+
+      <!-- Top Controls Row -->
+      <div class="top-controls-row">
+        <div class="controls-left">
+          <div class="subject-section">
+            <button class="subject-select-btn" onclick="openModal()">📚 Select Subject</button>
+            <span id="selectedSubjectDisplay" class="subject-required">* Required</span>
+          </div>
+          <!-- Add these buttons for marking all -->
+          <div class="mark-all-section">
+            <button class="mark-all-btn present-all" onclick="markAllStudents('Present')">Mark All Present</button>
+            <button class="mark-all-btn absent-all" onclick="markAllStudents('Absent')">Mark All Absent</button>
+          </div>
+        </div>
+
+        <div class="controls-center">
+          <div class="gender-tabs">
+            <button class="gender-btn active" onclick="filterGender('all', this)">👥 All</button>
+            <button class="gender-btn" onclick="filterGender('male', this)">👨 Male</button>
+            <button class="gender-btn" onclick="filterGender('female', this)">👩 Female</button>
+          </div>
+        </div>
+
+        <div class="controls-right">
+          <button class="save-btn" onclick="saveAttendance()">💾 Save Attendance</button>
+          <button class="save-btn reset" onclick="resetAttendance()">🔄 Reset All</button>
+        </div>
+      </div>
+
+      <!-- Attendance Table -->
+      <div class="attendance-table-container">
+        <table id="attendanceTable">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Attendance Status</th>
+            </tr>
+          </thead>
+
+          <thead class="male-header">
+            <tr>
+              <th colspan="2">👨 Male Students</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr class="male">
+              <td>Agapito, Cris Rovic M.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Aguilar, Gian Jay T.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Aruta, Mark Angelo P.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Beltran, Patrick</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Fernando, Cyrus M.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Francisco, John Carlo P.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Ilagan, Rhayber Joseph A.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Javier, Efren Louie</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Manalang, Ramil</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Mangulabnan, John Daniel S.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Marcos, Kenneth A.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Marcos, Prince DG.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Nipa, MJ P.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Puaso, Wency G.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Ramos, Janrey P.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Ramos, Jerome G.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Ramos, Rhanzell Clyde A.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="male">
+              <td>Trinidad, Cedrick S.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+          </tbody>
+
+          <thead class="female-header">
+            <tr>
+              <th colspan="2">👩 Female Students</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="female">
+              <td>Agustin, Lyka Joy B.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Binuya, Aliyah Nicole S.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Canoza, Shaira V.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Capinlac, Alexa Keseiah R.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Cornes, Jenny Ann A.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>De San Jose, Angelica Y.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Dela Cruz, Sarah Jhoi R.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Dequilla, Jhanna C.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Dizon, Samantha Nicole S.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Garcia, Mariane Shane DL.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Gaspalinao, Airiene D.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Gloria, Gianelli M.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Madrid, Noraine Zyra O.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Marcos, Kathleen Joy B.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Mase, Marianne P.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Medrano, Ashley Mae B.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Mendoza, Irish C.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Navarro, Rosette DC.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Nicha, Mizuki Rei</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Nool, Sharmaine DC.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Pabayos, Mary Jane DL.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Pagandahan, Larissa E.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Pascual, Lian Rose H.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Rico, Jena Faith P.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Rosco, Maureen S.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>San Jose, Chaize B.</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>San Jose, Diana Rose</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+            <tr class="female">
+              <td>Serrano, Angelica</td>
+              <td><button class="present" onclick="markAttendance(this,'Present')">✅ Present</button><button
+                  class="absent" onclick="markAttendance(this,'Absent')">❌ Absent</button><button class="cutting"
+                  onclick="markAttendance(this,'Cutting')">✂️ Cutting</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL -->
+  <div id="subjectModal" class="modal">
+    <div class="modal-content">
+      <h3>📚 Select a Subject</h3>
+      <div class="subject-grid">
+        <button onclick="selectSubject('EAPP')">EAPP</button>
+        <button onclick="selectSubject('Entrepreneurship')">Entrepreneurship</button>
+        <button onclick="selectSubject('Practical Research 2')">Practical Research 2</button>
+        <button onclick="selectSubject('COOKERY-ACP-ICT')">COOKERY-ACP-ICT</button>
+        <button onclick="selectSubject('Work Immersion')">Work Immersion</button>
+        <button onclick="selectSubject('Physical Education')">Physical Education</button>
+      </div>
+      <button class="close-modal" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Sidebar Toggle Function ---
+    let sidebarVisible = true;
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const floatingToggle = document.querySelector('.floating-toggle');
+
+      sidebarVisible = !sidebarVisible;
+
+      if (sidebarVisible) {
+        // Show sidebar
+        sidebar.classList.remove('sidebar-hidden');
+        mainContent.classList.remove('content-expanded');
+        floatingToggle.style.display = 'none';
+      } else {
+        // Hide sidebar
+        sidebar.classList.add('sidebar-hidden');
+        mainContent.classList.add('content-expanded');
+        floatingToggle.style.display = 'flex';
+      }
+
+      // Save sidebar state to localStorage
+      localStorage.setItem('sidebarVisible', sidebarVisible);
+    }
+
+    // --- Function to format date as YYYY-MM-DD ---
+    function getCurrentDate() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    // --- Function to format date in a more readable format ---
+    function formatDateForDisplay(dateString) {
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', options);
+    }
+
+    // --- Function to update the date display ---
+    function updateCurrentDate() {
+      // Check if there's a saved date from a previous session
+      const savedDate = localStorage.getItem('attendanceDate');
+
+      if (savedDate) {
+        // Use the saved date
+        document.getElementById('currentDate').textContent = savedDate;
+        return savedDate;
+      } else {
+        // Generate new date
+        const currentDate = getCurrentDate();
+        const formattedDate = formatDateForDisplay(currentDate);
+        document.getElementById('currentDate').textContent = formattedDate;
+        return formattedDate;
+      }
+    }
+
+    // --- Gender filter ---
+    function filterGender(gender, btn) {
+      document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const maleHeader = document.querySelector('.male-header');
+      const femaleHeader = document.querySelector('.female-header');
+
+      const maleRows = document.querySelectorAll('tr.male');
+      const femaleRows = document.querySelectorAll('tr.female');
+
+      if (gender === 'all') {
+        maleHeader.style.display = '';
+        femaleHeader.style.display = '';
+        maleRows.forEach(r => r.style.display = '');
+        femaleRows.forEach(r => r.style.display = '');
+      } else if (gender === 'male') {
+        maleHeader.style.display = '';
+        femaleHeader.style.display = 'none';
+        maleRows.forEach(r => r.style.display = '');
+        femaleRows.forEach(r => r.style.display = 'none');
+      } else if (gender === 'female') {
+        maleHeader.style.display = 'none';
+        femaleHeader.style.display = '';
+        maleRows.forEach(r => r.style.display = 'none');
+        femaleRows.forEach(r => r.style.display = '');
+      }
+    }
+
+    // --- Modal Controls ---
+    function openModal() {
+      document.getElementById("subjectModal").style.display = "flex";
+    }
+
+    function closeModal() {
+      document.getElementById("subjectModal").style.display = "none";
+    }
+
+    function selectSubject(subject) {
+      // Update the UI
+      const display = document.getElementById("selectedSubjectDisplay");
+      display.innerText = "📚 " + subject;
+      display.style.color = "#48ff00";
+      display.className = "subject-display";
+
+      // Save to localStorage so it persists
+      localStorage.setItem("selectedSubject", subject);
+      closeModal();
+    }
+
+    // --- Mark attendance ---
+    function markAttendance(button, status) {
+      const row = button.parentElement.parentElement;
+      row.dataset.attendance = status;
+
+      // Remove active class from all buttons in this row
+      row.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Add active class to the clicked button
+      button.classList.add('active');
+
+      // Add animation effect
+      button.style.animation = 'pulse 0.4s ease-out';
+      row.style.animation = 'pulse 0.4s ease-out';
+
+      setTimeout(() => {
+        row.style.animation = '';
+        button.style.animation = '';
+      }, 400);
+    }
+
+    // --- Mark all students function ---
+    function markAllStudents(status) {
+      // Confirm action with user
+      if (!confirm(`Are you sure you want to mark ALL students as ${status}?`)) {
+        return;
+      }
+
+      // Get all visible rows (respecting current gender filter)
+      const visibleRows = Array.from(document.querySelectorAll('#attendanceTable tbody tr'))
+        .filter(row => row.style.display !== 'none' && row.cells[0]); // Filter out hidden rows
+
+      // Mark each visible row
+      visibleRows.forEach(row => {
+        const studentName = row.cells[0].innerText;
+        const buttons = row.querySelectorAll('button');
+        
+        // Remove active class from all buttons in this row
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        // Add active class to the appropriate button
+        let targetButton;
+        if (status === 'Present') {
+          targetButton = row.querySelector('.present');
+          row.dataset.attendance = 'Present';
+        } else if (status === 'Absent') {
+          targetButton = row.querySelector('.absent');
+          row.dataset.attendance = 'Absent';
+        } else if (status === 'Cutting') {
+          targetButton = row.querySelector('.cutting');
+          row.dataset.attendance = 'Cutting';
+        }
+        
+        if (targetButton) {
+          targetButton.classList.add('active');
+          
+          // Add animation effect
+          targetButton.style.animation = 'pulse 0.4s ease-out';
+          row.style.animation = 'pulse 0.4s ease-out';
+          
+          setTimeout(() => {
+            row.style.animation = '';
+            targetButton.style.animation = '';
+          }, 400);
+        }
+      });
+
+      // Show confirmation
+      alert(`All ${visibleRows.length} visible students have been marked as ${status}.`);
+    }
+
+    // --- Optional: Add mark all for specific gender ---
+    function markAllByGender(gender, status) {
+      if (!confirm(`Are you sure you want to mark all ${gender} students as ${status}?`)) {
+        return;
+      }
+
+      const rows = document.querySelectorAll(`#attendanceTable tbody tr.${gender}`);
+      rows.forEach(row => {
+        const buttons = row.querySelectorAll('button');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        let targetButton;
+        if (status === 'Present') {
+          targetButton = row.querySelector('.present');
+          row.dataset.attendance = 'Present';
+        } else if (status === 'Absent') {
+          targetButton = row.querySelector('.absent');
+          row.dataset.attendance = 'Absent';
+        }
+        
+        if (targetButton) {
+          targetButton.classList.add('active');
+        }
+      });
+      
+      alert(`All ${gender} students have been marked as ${status}.`);
+    }
+
+    // --- Reset attendance ---
+    function resetAttendance() {
+      if (confirm("Are you sure you want to reset all attendance records?")) {
+        const rows = document.querySelectorAll('#attendanceTable tbody tr');
+        rows.forEach(row => {
+          delete row.dataset.attendance;
+          row.querySelectorAll('button').forEach(btn => {
+            btn.classList.remove('active');
+            btn.style.animation = '';
+          });
+        });
+        localStorage.removeItem('presentStudents');
+        localStorage.removeItem('absentStudents');
+        localStorage.removeItem('cuttingStudents');
+        localStorage.removeItem('attendanceDate');
+
+        // Also reset subject selection
+        localStorage.removeItem("selectedSubject");
+        const subjectDisplay = document.getElementById("selectedSubjectDisplay");
+        subjectDisplay.innerText = "* Required";
+        subjectDisplay.style.color = "#ff4d4d";
+        subjectDisplay.className = "subject-required";
+
+        alert("All attendance records have been reset.");
+      }
+    }
+
+    // --- Save attendance ---
+    function saveAttendance() {
+      // ✅ REQUIRED SUBJECT CHECK
+      const selectedSubject = localStorage.getItem("selectedSubject");
+      if (!selectedSubject || selectedSubject === "") {
+        alert("⚠️ Please select a subject before saving attendance.");
+        openModal(); // auto-open subject selector
+        return;
+      }
+      const rows = document.querySelectorAll('#attendanceTable tbody tr');
+      let presentStudents = [];
+      let absentStudents = [];
+      let cuttingStudents = [];
+      let unmarkedStudents = [];
+
+      rows.forEach(row => {
+        const studentName = row.cells[0].innerText;
+        const status = row.dataset.attendance;
+
+        if (status === 'Present') presentStudents.push(studentName);
+        else if (status === 'Absent') absentStudents.push(studentName);
+        else if (status === 'Cutting') cuttingStudents.push(studentName);
+        else unmarkedStudents.push(studentName);
+      });
+
+      // ✅ REQUIRE ALL STUDENTS MARKED
+      if (unmarkedStudents.length > 0) {
+        alert(
+          "Please mark attendance for all students.\n\nMissing:\n" +
+          unmarkedStudents.join('\n')
+        );
+        return;
+      }
+
+      // Get the CURRENT date from the displayed date (not generating a new one)
+      const currentDateText = document.getElementById('currentDate').textContent;
+
+      // Save data with timestamp
+      localStorage.setItem('presentStudents', JSON.stringify(presentStudents));
+      localStorage.setItem('absentStudents', JSON.stringify(absentStudents));
+      localStorage.setItem('cuttingStudents', JSON.stringify(cuttingStudents));
+      localStorage.setItem('attendanceDate', currentDateText);
+      localStorage.setItem('selectedSubject', selectedSubject);
+
+      // Also save the raw date for file naming
+      const rawDate = getCurrentDate();
+      localStorage.setItem('attendanceRawDate', rawDate);
+
+      // Save timestamp to prevent stale data
+      localStorage.setItem('attendanceTimestamp', new Date().getTime());
+
+      // Show success message
+      alert(`✅ Attendance saved successfully!\n\nSubject: ${selectedSubject}\nDate: ${currentDateText}\n\nPresent: ${presentStudents.length}\nAbsent: ${absentStudents.length}\nCutting: ${cuttingStudents.length}`);
+
+      // Immediately redirect to results page
+      window.location.href = "attendance-results.html";
+    }
+
+    // --- Load saved attendance on page load ---
+    window.onload = function () {
+      // Set current date on page load
+      const currentDate = updateCurrentDate();
+
+      // Load sidebar state
+      const savedSidebarState = localStorage.getItem('sidebarVisible');
+      if (savedSidebarState === 'false') {
+        toggleSidebar(); // Hide sidebar if it was hidden before
+      }
+
+      // Load saved subject if exists
+      const savedSubject = localStorage.getItem("selectedSubject");
+      const subjectDisplay = document.getElementById("selectedSubjectDisplay");
+
+      if (savedSubject && savedSubject !== "") {
+        subjectDisplay.innerText = "📚 " + savedSubject;
+        subjectDisplay.style.color = "#48ff00";
+        subjectDisplay.className = "subject-display";
+      } else {
+        subjectDisplay.innerText = "* Required";
+        subjectDisplay.style.color = "#ff4d4d";
+        subjectDisplay.className = "subject-required";
+      }
+
+      // Load saved attendance marks
+      const savedPresent = JSON.parse(localStorage.getItem('presentStudents')) || [];
+      const savedAbsent = JSON.parse(localStorage.getItem('absentStudents')) || [];
+      const savedCutting = JSON.parse(localStorage.getItem('cuttingStudents')) || [];
+
+      const rows = document.querySelectorAll('#attendanceTable tbody tr');
+
+      rows.forEach(row => {
+        const name = row.cells[0].innerText;
+
+        if (savedPresent.includes(name)) {
+          row.dataset.attendance = "Present";
+          const presentBtn = row.querySelector(".present");
+          presentBtn.classList.add("active");
+        }
+        if (savedAbsent.includes(name)) {
+          row.dataset.attendance = "Absent";
+          const absentBtn = row.querySelector(".absent");
+          absentBtn.classList.add("active");
+        }
+        if (savedCutting.includes(name)) {
+          row.dataset.attendance = "Cutting";
+          const cuttingBtn = row.querySelector(".cutting");
+          cuttingBtn.classList.add("active");
+        }
+      });
+    };
+
+    // --- Search students ---
+    function searchStudents() {
+      const searchInput = document.getElementById('searchInput').value.toLowerCase().trim();
+      document.querySelectorAll('#attendanceTable tbody tr').forEach(row => {
+        const studentName = row.cells[0].innerText.toLowerCase();
+        row.style.display = studentName.includes(searchInput) ? '' : 'none';
+      });
+    }
+
+    function clearSearch() {
+      document.getElementById('searchInput').value = '';
+      document.querySelectorAll('#attendanceTable tbody tr').forEach(row => row.style.display = '');
+    }
+
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function () {
+      // Add animation to buttons on hover
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('mouseenter', function () {
+          this.style.transform = 'translateY(-2px)';
+        });
+        button.addEventListener('mouseleave', function () {
+          this.style.transform = 'translateY(0)';
+        });
+      });
+
+      // Add click animation to table rows
+      const tableRows = document.querySelectorAll('#attendanceTable tbody tr');
+      tableRows.forEach(row => {
+        row.addEventListener('click', function (e) {
+          if (!e.target.matches('button')) {
+            this.style.backgroundColor = 'rgba(102, 0, 255, 0.1)';
+            setTimeout(() => {
+              this.style.backgroundColor = '';
+            }, 300);
+          }
+        });
+      });
+    });
+  </script>
+
+</body>
+
+</html>

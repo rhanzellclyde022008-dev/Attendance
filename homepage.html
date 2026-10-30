@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Dashboard - Home</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0f;
+            --sidebar-bg: #11111a;
+            --card-bg: #1a1a2e;
+            --border: #2a2a3e;
+            --text: #e0e0e0;
+            --purple: #6600ff;
+            --purple-light: #7b1fa2;
+            --green: #48ff00;
+            --red: #ff4d4d;
+            --yellow: #ffc107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: var(--sidebar-bg);
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border);
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar nav ul li {
+            padding: 15px 20px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .sidebar nav ul li:hover {
+            background: rgba(102, 0, 255, 0.1);
+        }
+
+        .sidebar nav ul li.active {
+            background: var(--purple);
+            color: white;
+        }
+
+        .sidebar-bottom {
+            list-style: none;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-bottom li {
+            padding: 12px 20px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-bottom li:hover {
+            background: rgba(102, 0, 255, 0.1);
+        }
+
+        /* Main Content */
+        .content {
+            flex: 1;
+            margin-left: 250px;
+            min-height: 100vh;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(102, 0, 255, 0.1) 0%, rgba(26, 26, 46, 0.8) 100%);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(102, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(123, 31, 162, 0.1) 0%, transparent 50%);
+            z-index: 0;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Section */
+        .header-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .header-left img,
+        .header-right img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(102, 0, 255, 0.1);
+            border: 2px solid var(--purple);
+        }
+
+        .header-center {
+            text-align: center;
+        }
+
+        .header-center h1 {
+            font-size: 36px;
+            margin: 0;
+            background: linear-gradient(45deg, var(--purple), #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header-center .class-name {
+            font-size: 20px;
+            color: var(--purple);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Welcome Section */
+        .welcome-section {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            border: 2px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .welcome-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: var(--purple);
+            text-align: center;
+        }
+
+        .welcome-section p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            text-align: center;
+            color: #b0b0b0;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            border-color: var(--purple);
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--purple);
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            color: #b0b0b0;
+        }
+
+        /* Image Gallery Section */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .image-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 2px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .image-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--purple);
+            box-shadow: 0 15px 40px rgba(102, 0, 255, 0.3);
+        }
+
+        .image-card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .content {
+                margin-left: 200px;
+            }
+
+            .header-center h1 {
+                font-size: 28px;
+            }
+
+            .header-left img,
+            .header-right img {
+                width: 60px;
+                height: 60px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                padding: 20px 10px;
+            }
+
+            .sidebar .logo {
+                font-size: 20px;
+                margin-bottom: 30px;
+            }
+
+            .sidebar nav ul li {
+                padding: 12px 5px;
+                font-size: 12px;
+                text-align: center;
+            }
+
+            .content {
+                margin-left: 70px;
+                padding: 20px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .image-gallery {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                display: none;
+            }
+
+            .content {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .header-center h1 {
+                font-size: 24px;
+            }
+
+            .header-center .class-name {
+                font-size: 16px;
+            }
+
+            .welcome-section {
+                padding: 25px;
+            }
+
+            .welcome-section h2 {
+                font-size: 24px;
+            }
+
+            .image-card img {
+                height: 200px;
+            }
+
+            .stat-card {
+                padding: 20px;
+            }
+
+            .stat-number {
+                font-size: 36px;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--purple);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--purple-light);
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">12 - Selenite</div>
+        <nav>
+            <ul>
+                <li class="active" onclick="window.location.href='homepage.html'">🏠 Home</li>
+                <li onclick="window.location.href='attendance.html'">📋 Attendance</li>
+                <li onclick="window.location.href='help.html'">ℹ️ Help</li>
+                <li onclick="window.location.href='login.html'">🚪 Log Out</li>
+
+            </ul>
+        </nav>
+        <div class="sidebar-bottom">
+
+        </div>
+    </aside>
+
+    <main class="content">
+        <div class="main-container">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="header-left">
+                    <img src="srlogo.png" alt="School Logo">
+                </div>
+                <div class="header-center">
+                    <h1>Classroom Dashboard</h1>
+                    <div class="class-name">12-SELENITE HOMEROOM</div>
+                </div>
+                <div class="header-right">
+                    <img src="sectionlogo.png" alt="Section Logo">
+                </div>
+            </div>
+
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h2>Welcome, Teacher!</h2>
+                <p>Manage your classroom efficiently with this comprehensive dashboard. Track attendance, monitor
+                    student progress, and access important resources all in one place.</p>
+                <div class="stats-section">
+                    <div class="stat-card" onclick="window.location.href='attendance.html'">
+                        <div class="stat-number" id="totalStudents">46</div>
+                        <div class="stat-label">Total Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">6</div>
+                        <div class="stat-label">Subjects</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">42.5</div>
+                        <div class="stat-label">Weekly Hours</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Gallery Section -->
+            <div class="image-gallery">
+                <!-- First Image -->
+                <div class="image-card">
+                    <img src="student.png" alt="Classroom Environment"
+                        onerror="this.src='https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'">
+                </div>
+
+                <!-- Second Image -->
+                <div class="image-card">
+                    <img src="students.png" alt="Student Activities"
+                        onerror="this.src='https://images.unsplash.com/photo-1524178234883-043d5c3f3cf4?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80'">
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Initialize the homepage
+        window.onload = function () {
+            // Set current date in header if needed
+            updateCurrentDate();
+
+            // Add hover effects
+            initializeHoverEffects();
+
+            // Check if images exist, fallback to placeholders
+            checkImages();
+        };
+
+        // Update current date
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = now.toLocaleDateString('en-US', options);
+        }
+
+        // Initialize hover effects
+        function initializeHoverEffects() {
+            const cards = document.querySelectorAll('.stat-card, .image-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = this.classList.contains('stat-card') ? 'translateY(-5px)' : 'translateY(-10px)';
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        }
+
+        // Check if images exist and provide fallback
+        function checkImages() {
+            const images = document.querySelectorAll('img[src]');
+            images.forEach(img => {
+                img.onerror = function () {
+                    // If local images fail, use Unsplash placeholders
+                    if (this.alt.includes('Classroom')) {
+                        this.src = 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
+                    } else if (this.alt.includes('Student')) {
+                        this.src = 'https://images.unsplash.com/photo-1524178234883-043d5c3f3cf4?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
+                    } else if (this.alt.includes('School')) {
+                        this.src = 'https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80';
+                    }
+                };
+            });
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Are you sure you want to log out?')) {
+                alert('Logged out successfully!');
+                window.location.href = 'login.html'; // Redirect to login page
+            }
+        }
+
+        // Help function
+        function showHelp() {
+            alert('Help Information:\n\n' +
+                '1. 📋 Attendance - Mark student attendance for each subject\n' +
+                '2. 📊 Reports - View attendance reports and statistics\n' +
+                '3. 👨‍🎓 Students - View student information and profiles\n' +
+                '4. ⚙️ Settings - Configure system settings\n\n' +
+                'For further assistance, please contact the system administrator.');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            // Ctrl + A for attendance
+            if (e.ctrlKey && e.key === 'a') {
+                e.preventDefault();
+                window.location.href = 'attendance.html';
+            }
+            // Ctrl + H for home
+            if (e.ctrlKey && e.key === 'h') {
+                e.preventDefault();
+                window.location.href = 'homepage.html';
+            }
+            // F1 for help
+            if (e.key === 'F1') {
+                e.preventDefault();
+                showHelp();
+            }
+        });
+
+        // Add animation to page elements on load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate elements sequentially
+            const animatedElements = document.querySelectorAll('.header-section, .welcome-section, .image-card');
+            animatedElements.forEach((element, index) => {
+                setTimeout(() => {
+                    element.style.animation = 'slideUp 0.6s ease-out forwards';
+                }, index * 100);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

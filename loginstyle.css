@@ -1,0 +1,202 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+    background-color: #0a0a0a;
+    /* Deep black background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: #ffffff;
+}
+
+.login-container {
+    background-color: #121212;
+    padding: 40px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    /* Required for RGB effect */
+    position: relative;
+    overflow: hidden;
+    /* Keeps the animation inside the border radius */
+    z-index: 1;
+}
+
+/* The RGB Border Effect */
+.login-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(#ff0000, #ff7300, #fffb00, #48ff00,
+            #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000);
+    animation: rotate-rgb 4s linear infinite;
+    z-index: -2;
+}
+
+/* The Inner Mask (creates the 3px border look) */
+.login-container::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    /* This creates the 3px thickness */
+    background: #121212;
+    /* Matches container background */
+    border-radius: 9px;
+    /* Slightly less than 12px to look natural */
+    z-index: -1;
+}
+
+/* Animation Keyframes */
+@keyframes rotate-rgb {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.app-icon {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #3b82f6;
+}
+
+h2 {
+    font-size: 24px;
+    margin-bottom: 40px;
+    font-weight: 500;
+}
+
+.subtitle {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 30px;
+}
+
+.subtitle a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Input Styles */
+.input-box {
+    margin-bottom: 15px;
+}
+
+input {
+    width: 100%;
+    padding: 14px 16px;
+    background-color: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    transition: border 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    /* Blue focus border */
+}
+
+/* Button Style */
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background-color: #007bff;
+    /* The specific blue from the image */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: #0056b3;
+    box-shadow: 0 0 15px rgba(168, 230, 255, 0.8);
+}
+
+/* Error Message */
+#error-msg {
+    font-size: 13px;
+    margin-top: 15px;
+    min-height: 18px;
+}
+
+/* Optional Extras: Social Buttons */
+.divider {
+    margin: 25px 0;
+    border-top: 1px solid #333;
+    position: relative;
+}
+
+.divider span {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #121212;
+    padding: 0 10px;
+    font-size: 10px;
+    color: #666;
+}
+
+.social-login {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.social-btn {
+    flex: 1;
+    padding: 10px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+}
+
+.app-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Space between logo and "Welcome Back" */
+}
+
+.school-logo {
+    width: 120px;
+    /* Adjust this size to your liking */
+    height: auto;
+    /* Keeps the image proportions */
+    border-radius: 50%;
+    /* Optional: makes the logo circular if it's a square image */
+    object-fit: contain;
+    /* Prevents stretching */
+}
+
+.school-logo {
+    /* ... existing styles ... */
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
+}
